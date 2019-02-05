@@ -9,13 +9,19 @@
 const Uint32 CEIL_COLOR = RGB(0x20, 0x20, 0x20);
 const Uint32 FLOOR_COLOR = RGB(0x40, 0x40, 0x40);
 
+static double plane_correction;
+
+void render_init() {
+    plane_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH) * 0.768;
+}
+
 void render_scene(double view_x, double view_y, double view_angle) {
     double view_angle_rad = DEG2RAD(view_angle);
     double facing_x = sin(view_angle_rad);
     double facing_y = cos(view_angle_rad);
 
     double camera_plane_x = sin(view_angle_rad + (M_PI / 2));
-    double camera_plane_y = cos(view_angle_rad + (M_PI / 2)); /* ~75 degree FOV */
+    double camera_plane_y = cos(view_angle_rad + (M_PI / 2));
 
     int rx, ry;
     int render_center = RENDER_HEIGHT / 2;
@@ -23,8 +29,8 @@ void render_scene(double view_x, double view_y, double view_angle) {
     /* Cast one ray for each vertical strip. */
     for(rx = 0; rx < RENDER_WIDTH; rx++) {
         double camera_x = 2 * rx / (double)RENDER_WIDTH - 1;
-        double ray_delta_x = facing_x + camera_plane_x * camera_x;
-        double ray_delta_y = facing_y + camera_plane_y * camera_x;
+        double ray_delta_x = facing_x + camera_plane_x * plane_correction * camera_x;
+        double ray_delta_y = facing_y + camera_plane_y * plane_correction * camera_x;
 
         int view_tile_x = (int)view_x;
         int view_tile_y = (int)view_y;
@@ -39,7 +45,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
         double distance;
 
         Uint8 hit = 0;
-        SDL_bool shade;
+        SDL_bool shade = SDL_FALSE;
 
         if(ray_delta_x > 0) {
             step_x = 1;

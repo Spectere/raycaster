@@ -21,9 +21,9 @@
 #define TURN_SPEED 2.5
 
 /* Player starting position. */
-#define PLAYER_START_X 8
-#define PLAYER_START_Y 8
-#define PLAYER_START_ANGLE 0.0
+#define PLAYER_START_X 8.5
+#define PLAYER_START_Y 8.5
+#define PLAYER_START_ANGLE 90
 
 /* Math stuff. */
 #define DEG2RAD(angle) (angle * (M_PI / 180))

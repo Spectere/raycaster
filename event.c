@@ -8,7 +8,7 @@
 #include "player.h"
 #include "map.h"
 
-Uint8 *key_state;
+static Uint8 *key_state;
 
 void event_init() {
 	key_state = SDL_GetKeyboardState(NULL);
@@ -25,7 +25,6 @@ void event_keyboard(const SDL_Event e) {
 
 void event_process() {
 	SDL_Event e;
-	SDL_bool speed = SDL_FALSE;
 	double move_speed = MOVE_SPEED;
 	double turn_speed = TURN_SPEED;
 	double player_angle_rads = DEG2RAD(player_angle);
