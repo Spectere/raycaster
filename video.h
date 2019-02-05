@@ -4,6 +4,7 @@
 #define _VIDEO_H
 
 #include <SDL.h>
+#include <assert.h>
 
 #include "defs.h"
 

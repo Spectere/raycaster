@@ -5,13 +5,13 @@
 
 #include "video.h"
 
-#define PAL(idx) RGB(palette_cga[3 * idx],\
-                     palette_cga[3 * idx + 1],\
-                     palette_cga[3 * idx + 2])
+#define PAL(idx) RGB(palette_cga[3 * (idx)],\
+                     palette_cga[3 * (idx) + 1],\
+                     palette_cga[3 * (idx) + 2])
 
-#define PAL_ALT(idx) RGB((int)(palette_cga[3 * idx] / 1.5),\
-                         (int)(palette_cga[3 * idx + 1] / 1.5),\
-                         (int)(palette_cga[3 * idx + 2] / 1.5))
+#define PAL_ALT(idx) RGB((int)(palette_cga[3 * (idx)] / 1.5),\
+                         (int)(palette_cga[3 * (idx) + 1] / 1.5),\
+                         (int)(palette_cga[3 * (idx) + 2] / 1.5))
 
 static const Uint8 palette_cga[48] = {
 	0x00, 0x00, 0x00,	/* 0x00 */

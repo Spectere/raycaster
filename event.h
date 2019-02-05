@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 
+void event_init();
 void event_process();
 
 #endif /* _EVENT_H */

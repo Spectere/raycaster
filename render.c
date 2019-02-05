@@ -6,8 +6,11 @@
 #include "palette.h"
 #include "render.h"
 
+const Uint32 CEIL_COLOR = RGB(0x20, 0x20, 0x20);
+const Uint32 FLOOR_COLOR = RGB(0x40, 0x40, 0x40);
+
 void render_scene(double view_x, double view_y, double view_angle) {
-    double view_angle_rad = view_angle * (M_PI / 180);
+    double view_angle_rad = DEG2RAD(view_angle);
     double facing_x = sin(view_angle_rad);
     double facing_y = cos(view_angle_rad);
 
@@ -75,9 +78,15 @@ void render_scene(double view_x, double view_y, double view_angle) {
             distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x;
 
         line_height = (int)(RENDER_HEIGHT / distance);
-        for(ry = render_center; ry < render_center + line_height; ry++)
-            pixels[POS(rx, ry)] = !shade ? PAL(hit) : PAL_ALT(hit);
-        for(ry = render_center - 1; ry > render_center - line_height; ry--)
-            pixels[POS(rx, ry)] = !shade ? PAL(hit) : PAL_ALT(hit);
+        for(ry = render_center; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
+            pixels[POS(rx, ry)] = !shade ? PAL(hit & 0x0F) : PAL_ALT(hit & 0x0F);
+        for(ry = render_center - 1; ry > render_center - line_height && ry >= 0; ry--)
+            pixels[POS(rx, ry)] = !shade ? PAL(hit & 0x0F) : PAL_ALT(hit & 0x0F);
+
+        /* Draw the floor and ceiling. */
+        for(ry = render_center + line_height; ry < RENDER_HEIGHT; ry++)
+            pixels[POS(rx, ry)] = FLOOR_COLOR;
+        for(ry = render_center - line_height; ry >= 0; ry--)
+            pixels[POS(rx, ry)] = CEIL_COLOR;
     }
 }
