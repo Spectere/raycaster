@@ -6,6 +6,7 @@
 #include "event.h"
 #include "game.h"
 #include "player.h"
+#include "map.h"
 
 Uint8 *key_state;
 
@@ -62,6 +63,11 @@ void event_process() {
 		player_x += sin(player_angle_rads + (M_PI / 2)) * move_speed;
 		player_y += cos(player_angle_rads + (M_PI / 2)) * move_speed;
 	}
+
+	if(player_x > MAP_SIZE_X - 0.01) player_x = MAP_SIZE_X - 0.01;
+	if(player_y > MAP_SIZE_Y - 0.01) player_y = MAP_SIZE_Y - 0.01;
+	if(player_x < 0) player_x = 0;
+	if(player_y < 0) player_y = 0;
 
 	while(SDL_PollEvent(&e)) {
 		switch(e.type) {

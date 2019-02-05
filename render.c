@@ -69,6 +69,11 @@ void render_scene(double view_x, double view_y, double view_angle) {
                 shade = SDL_FALSE;
             }
 
+            /* Bail out if the ray escapes the map boundary. */
+            if(view_tile_x >= MAP_SIZE_X || view_tile_x < 0
+            || view_tile_y >= MAP_SIZE_Y || view_tile_y < 0)
+                break;
+
             hit = map_data[(view_tile_y * MAP_SIZE_X) + view_tile_x];
         }
 
@@ -77,7 +82,8 @@ void render_scene(double view_x, double view_y, double view_angle) {
         else
             distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x;
 
-        line_height = (int)(RENDER_HEIGHT / distance);
+        if(hit == 0) line_height = 0;
+        else line_height = (int)(RENDER_HEIGHT / distance);
         for(ry = render_center; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
             pixels[POS(rx, ry)] = !shade ? PAL(hit & 0x0F) : PAL_ALT(hit & 0x0F);
         for(ry = render_center - 1; ry > render_center - line_height && ry >= 0; ry--)
