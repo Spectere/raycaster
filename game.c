@@ -14,7 +14,7 @@ void game_loop() {
 	while(game_running) {
 		/* TODO: Achieve proper framerate independence. :) */
 		event_process();
-		render_scene(player_x, player_y, player_angle);
+		render_scene(player_x, player_y, 0);
 		video_update();
 	}
 }

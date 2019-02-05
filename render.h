@@ -7,6 +7,6 @@
 
 #include "map.h"
 
-void render_scene(float view_x, float view_y, float view_angle);
+void render_scene(double view_x, double view_y, double view_angle);
 
 #endif /* _RENDER_H */

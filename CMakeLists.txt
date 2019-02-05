@@ -15,4 +15,4 @@ add_executable(raycaster
         render.c
         player.c)
 
-target_link_libraries(raycaster ${SDL2_LIBRARIES})
+target_link_libraries(raycaster m ${SDL2_LIBRARIES})
