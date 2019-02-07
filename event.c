@@ -37,12 +37,12 @@ void event_process() {
 
 	if(key_state[SDL_SCANCODE_UP] || key_state[SDL_SCANCODE_W]) {
 		player_x += sin(player_angle_rads) * move_speed;
-		player_y += cos(player_angle_rads) * move_speed;
+		player_y -= cos(player_angle_rads) * move_speed;
 	}
 
 	if(key_state[SDL_SCANCODE_DOWN] || key_state[SDL_SCANCODE_S]) {
 		player_x -= sin(player_angle_rads) * move_speed;
-		player_y -= cos(player_angle_rads) * move_speed;
+		player_y += cos(player_angle_rads) * move_speed;
 	}
 
 	if(key_state[SDL_SCANCODE_LEFT]) {
@@ -55,12 +55,12 @@ void event_process() {
 
 	if(key_state[SDL_SCANCODE_A]) {
 		player_x += sin(player_angle_rads - (M_PI / 2)) * move_speed;
-		player_y += cos(player_angle_rads - (M_PI / 2)) * move_speed;
+		player_y -= cos(player_angle_rads - (M_PI / 2)) * move_speed;
 	}
 
 	if(key_state[SDL_SCANCODE_D]) {
 		player_x += sin(player_angle_rads + (M_PI / 2)) * move_speed;
-		player_y += cos(player_angle_rads + (M_PI / 2)) * move_speed;
+		player_y -= cos(player_angle_rads + (M_PI / 2)) * move_speed;
 	}
 
 	if(player_x > MAP_SIZE_X - 0.01) player_x = MAP_SIZE_X - 0.01;

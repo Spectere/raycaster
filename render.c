@@ -18,10 +18,10 @@ void render_init() {
 void render_scene(double view_x, double view_y, double view_angle) {
     double view_angle_rad = DEG2RAD(view_angle);
     double facing_x = sin(view_angle_rad);
-    double facing_y = cos(view_angle_rad);
+    double facing_y = -cos(view_angle_rad);
 
     double camera_plane_x = sin(view_angle_rad + (M_PI / 2));
-    double camera_plane_y = cos(view_angle_rad + (M_PI / 2));
+    double camera_plane_y = -cos(view_angle_rad + (M_PI / 2));
 
     int rx, ry;
     int render_center = RENDER_HEIGHT / 2;
