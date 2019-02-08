@@ -5,8 +5,8 @@
 
 #include <SDL.h>
 
-extern float player_x;
-extern float player_y;
-extern float player_angle;
+extern double player_x;
+extern double player_y;
+extern double player_angle;
 
 #endif /* _PLAYER_H */
