@@ -24,6 +24,7 @@
 #define PLAYER_START_X 8.5
 #define PLAYER_START_Y 8.5
 #define PLAYER_START_ANGLE 90
+#define PLAYER_SIZE 0.5
 
 /* Math stuff. */
 #define DEG2RAD(angle) (angle * (M_PI / 180))
