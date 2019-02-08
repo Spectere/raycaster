@@ -9,8 +9,6 @@
 SDL_bool game_running = SDL_TRUE;
 
 void game_loop() {
-	Uint8 r = 0, g = 64, b = 128;
-	int i;
 	event_init();
 	render_init();
 	while(game_running) {
