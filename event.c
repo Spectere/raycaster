@@ -8,7 +8,7 @@
 #include "map.h"
 #include "player.h"
 
-static Uint8 *key_state;
+static const Uint8 *key_state;
 
 void event_init() {
 	key_state = SDL_GetKeyboardState(NULL);
