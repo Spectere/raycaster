@@ -1,6 +1,7 @@
 /* render.c */
 
 #include <math.h>
+#include <stdlib.h>
 
 #include "defs.h"
 #include "palette/palette.h"
@@ -10,9 +11,13 @@ const color_t CEIL_COLOR = { 0xFF, 0x20, 0x20, 0x20 };
 const color_t FLOOR_COLOR = { 0xFF, 0x40, 0x40, 0x40 };
 
 static double aspect_correction;
+static Uint64 ceil_color_precalc, floor_color_precalc;
 
 void render_init() {
     aspect_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH);
+
+    ceil_color_precalc = ((Uint64)COL_TO_ARGB(CEIL_COLOR) << 32) + COL_TO_ARGB(CEIL_COLOR);
+    floor_color_precalc = ((Uint64)COL_TO_ARGB(FLOOR_COLOR) << 32) + COL_TO_ARGB(FLOOR_COLOR);
 }
 
 void render_scene(double view_x, double view_y, double view_angle) {
@@ -26,7 +31,14 @@ void render_scene(double view_x, double view_y, double view_angle) {
     int rx, ry, render_start;
     int render_center = RENDER_HEIGHT / 2;
 
-    /* Cast one ray for each vertical strip. */
+    Uint64 *fill_location = (Uint64*)pixels;
+    int i, fill_size = render_center * RENDER_WIDTH / 2;
+    for(i = 0; i < fill_size; i++)
+        fill_location[i] = ceil_color_precalc;
+    for(; i < RENDER_WIDTH * RENDER_HEIGHT / 2; i++)
+        fill_location[i] = floor_color_precalc;
+
+/* Cast one ray for each vertical strip. */
     for(rx = 0; rx < RENDER_WIDTH; rx++) {
         double camera_x = 2 * rx / (double)RENDER_WIDTH - 1;
         double ray_delta_x = facing_x + camera_plane_x * camera_x;
@@ -112,12 +124,6 @@ void render_scene(double view_x, double view_y, double view_angle) {
         render_start = render_center - (int)line_height;
         for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
             pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
-
-        /* Draw the floor and ceiling. */
-        for(ry = render_center + (int)line_height; ry < RENDER_HEIGHT; ry++)
-            pixels[POS(rx, ry)] = COL_TO_ARGB(FLOOR_COLOR);
-        for(ry = render_center - (int)line_height; ry >= 0; ry--)
-            pixels[POS(rx, ry)] = COL_TO_ARGB(CEIL_COLOR);
 
 #ifdef USE_ANTIALIAS
         /* Do a quick anti-aliasing pass using the fractional bit of line_height. This add a bit of
