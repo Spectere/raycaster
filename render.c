@@ -9,10 +9,10 @@
 const Uint32 CEIL_COLOR = RGB(0x20, 0x20, 0x20);
 const Uint32 FLOOR_COLOR = RGB(0x40, 0x40, 0x40);
 
-static double plane_correction;
+static double aspect_correction;
 
 void render_init() {
-    plane_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH) * 0.768;
+    aspect_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH);
 }
 
 void render_scene(double view_x, double view_y, double view_angle) {
@@ -29,8 +29,8 @@ void render_scene(double view_x, double view_y, double view_angle) {
     /* Cast one ray for each vertical strip. */
     for(rx = 0; rx < RENDER_WIDTH; rx++) {
         double camera_x = 2 * rx / (double)RENDER_WIDTH - 1;
-        double ray_delta_x = facing_x + camera_plane_x * plane_correction * camera_x;
-        double ray_delta_y = facing_y + camera_plane_y * plane_correction * camera_x;
+        double ray_delta_x = facing_x + camera_plane_x * camera_x;
+        double ray_delta_y = facing_y + camera_plane_y * camera_x;
 
         int view_tile_x = (int)view_x;
         int view_tile_y = (int)view_y;
@@ -84,9 +84,9 @@ void render_scene(double view_x, double view_y, double view_angle) {
         }
 
         if(shade)
-            distance = (view_tile_y - view_y + (double)(1 - step_y) / 2) / ray_delta_y;
+            distance = (view_tile_y - view_y + (double)(1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
         else
-            distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x;
+            distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
 
         if(hit == 0) line_height = 0;
         else line_height = (int)(RENDER_HEIGHT / distance);

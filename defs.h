@@ -10,8 +10,13 @@
 #define RENDER_HEIGHT 240
 
 /* The SDL window size. */
-#define WINDOW_WIDTH 960
-#define WINDOW_HEIGHT 720
+#define RENDER_SCALE 3
+#define WINDOW_WIDTH (RENDER_WIDTH * RENDER_SCALE)
+#define WINDOW_HEIGHT (RENDER_HEIGHT * RENDER_SCALE)
+
+/* The world scale. Lower this to make things feel more claustrophobic.
+ * 3x feels roughly the same size as Wolf3D. */
+#define WORLD_SCALE 3
 
 /* Maximum length of the log format string, including the severity tag. */
 #define LOG_LEN 160
