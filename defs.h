@@ -5,6 +5,9 @@
 
 #include <math.h>
 
+/* Optional features. */
+#define USE_ANTIALIAS
+
 /* The size of the pixmap. */
 #define RENDER_WIDTH 320
 #define RENDER_HEIGHT 240
