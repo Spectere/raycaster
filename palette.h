@@ -3,9 +3,8 @@
 #ifndef _PALETTE_H
 #define _PALETTE_H
 
+#include "defs.h"
 #include "video.h"
-
-#define SHADE_FACTOR 1.5
 
 #define PAL(idx) RGB(palette_cga[3 * (idx)],\
                      palette_cga[3 * (idx) + 1],\

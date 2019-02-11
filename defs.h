@@ -1,4 +1,7 @@
-/* defs.h - Global definitions and constants. */
+/* defs.h - Global definitions and constants.
+ *
+ * Honestly, most of this stuff probably belongs in a config file, but I'm
+ * on a roll, yo.*/
 
 #ifndef _DEFS_H
 #define _DEFS_H
@@ -42,5 +45,8 @@
 
 /* Math stuff. */
 #define DEG2RAD(angle) (angle * (M_PI / 180))
+
+/* Shading. */
+#define SHADE_FACTOR 1.5
 
 #endif /* _DEFS_H */
