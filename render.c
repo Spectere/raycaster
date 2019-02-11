@@ -23,7 +23,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
     double camera_plane_x = sin(view_angle_rad + (M_PI / 2));
     double camera_plane_y = -cos(view_angle_rad + (M_PI / 2));
 
-    int rx, ry;
+    int rx, ry, render_start;
     int render_center = RENDER_HEIGHT / 2;
 
     /* Cast one ray for each vertical strip. */
@@ -109,9 +109,8 @@ void render_scene(double view_x, double view_y, double view_angle) {
 #endif /* USE_ANTIALIAS */
         }
 
-        for(ry = render_center; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
-            pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
-        for(ry = render_center - 1; ry > render_center - line_height && ry >= 0; ry--)
+        render_start = render_center - (int)line_height;
+        for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
             pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
 
         /* Draw the floor and ceiling. */
