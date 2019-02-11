@@ -13,6 +13,8 @@ add_executable(raycaster
         video.c
         event.c
         render.c
-        player.c)
+        player.c
+        palette/palette_cga.c
+        )
 
 target_link_libraries(raycaster m ${SDL2_LIBRARIES})

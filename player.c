@@ -43,15 +43,15 @@ void player_collision() {
         player_y = player_tile_y2 - PLAYER_SIZE;
 }
 
-void player_turn(double delta) {
+void player_turn(double direction) {
     if(fabs(player_spin) >= TURN_SPEED_MAX)
         return;
 
-    player_spin += delta;
+    player_spin += TURN_SPEED * direction;
 }
 
 void player_update() {
-    if(player_speed_x + player_speed_y == 0) return;
+    if(player_speed_x + player_speed_y == 0.0 && player_spin == 0.0) return;
 
     /* Move/turn player. */
     player_x += player_speed_x;

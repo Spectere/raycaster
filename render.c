@@ -3,18 +3,11 @@
 #include <math.h>
 
 #include "defs.h"
-#include "palette.h"
+#include "palette/palette.h"
 #include "render.h"
 
-const Uint8 CEIL_R = 0x20;
-const Uint8 CEIL_G = 0x20;
-const Uint8 CEIL_B = 0x20;
-const Uint8 FLOOR_R = 0x40;
-const Uint8 FLOOR_G = 0x40;
-const Uint8 FLOOR_B = 0x40;
-
-const Uint32 CEIL_COLOR = RGB(0x20, 0x20, 0x20);
-const Uint32 FLOOR_COLOR = RGB(0x40, 0x40, 0x40);
+const color_t CEIL_COLOR = { 0xFF, 0x20, 0x20, 0x20 };
+const color_t FLOOR_COLOR = { 0xFF, 0x40, 0x40, 0x40 };
 
 static double aspect_correction;
 
@@ -48,10 +41,11 @@ void render_scene(double view_x, double view_y, double view_angle) {
         double delta_y = fabs(1 / ray_delta_y);
 
         int step_x, step_y;
+        color_t wall_color;
 
 #ifdef USE_ANTIALIAS
         double line_height, frac_level;
-        Uint8 aa_r, aa_g, aa_b;
+        color_t aa_final;
 #else
         int line_height;
 #endif /* USE_ANTIALIAS */
@@ -97,10 +91,13 @@ void render_scene(double view_x, double view_y, double view_angle) {
             hit = map_data[(view_tile_y * MAP_SIZE_X) + view_tile_x];
         }
 
-        if(shade)
-            distance = (view_tile_y - view_y + (double)(1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
-        else
-            distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
+        if(shade) {
+            distance = (view_tile_y - view_y + (double) (1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
+            SHADE_COL(palette_cga[hit & 0x0F], wall_color);
+        } else {
+            distance = (view_tile_x - view_x + (double) (1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
+            wall_color = palette_cga[hit & 0x0F];
+        }
 
         if(hit == 0) {
             line_height = 0;
@@ -113,15 +110,15 @@ void render_scene(double view_x, double view_y, double view_angle) {
         }
 
         for(ry = render_center; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
-            pixels[POS(rx, ry)] = !shade ? PAL(hit & 0x0F) : PAL_ALT(hit & 0x0F);
+            pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
         for(ry = render_center - 1; ry > render_center - line_height && ry >= 0; ry--)
-            pixels[POS(rx, ry)] = !shade ? PAL(hit & 0x0F) : PAL_ALT(hit & 0x0F);
+            pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
 
         /* Draw the floor and ceiling. */
         for(ry = render_center + (int)line_height; ry < RENDER_HEIGHT; ry++)
-            pixels[POS(rx, ry)] = FLOOR_COLOR;
+            pixels[POS(rx, ry)] = COL_TO_ARGB(FLOOR_COLOR);
         for(ry = render_center - (int)line_height; ry >= 0; ry--)
-            pixels[POS(rx, ry)] = CEIL_COLOR;
+            pixels[POS(rx, ry)] = COL_TO_ARGB(CEIL_COLOR);
 
 #ifdef USE_ANTIALIAS
         /* Do a quick anti-aliasing pass using the fractional bit of line_height. This add a bit of
@@ -130,19 +127,16 @@ void render_scene(double view_x, double view_y, double view_angle) {
         if(frac_level == 0) continue;
 
         ry = render_center - (int)line_height;
+
         if(ry >= 0) {
-            aa_r = (Uint8)((CEIL_R * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            aa_g = (Uint8)((CEIL_G * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3 + 1] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            aa_b = (Uint8)((CEIL_B * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3 + 2] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            pixels[POS(rx, ry)] = RGB(aa_r, aa_g, aa_b);
+            BLEND(aa_final, CEIL_COLOR, wall_color, frac_level);
+            pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 
         ry = render_center + (int)line_height;
         if(ry < RENDER_HEIGHT) {
-            aa_r = (Uint8)((FLOOR_R * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            aa_g = (Uint8)((FLOOR_G * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3 + 1] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            aa_b = (Uint8)((FLOOR_B * (1 - frac_level)) + (palette_cga[(hit & 0x0F) * 3 + 2] / (shade ? SHADE_FACTOR : 1.0) * frac_level));
-            pixels[POS(rx, ry)] = RGB(aa_r, aa_g, aa_b);
+            BLEND(aa_final, FLOOR_COLOR, wall_color, frac_level);
+            pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 #endif /* USE_ANTIALIAS */
     }

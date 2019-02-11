@@ -25,15 +25,14 @@ void event_keyboard(const SDL_Event e) {
 
 void event_process() {
 	SDL_Event e;
-	double move_multiplier = 1.0;
-	double turn_speed = TURN_SPEED;
+	double move_multiplier = 1.0, turn_multiplier = 1.0;
 	double player_angle_rads = DEG2RAD(player_angle);
 	double player_move_x = 0.0, player_move_y = 0.0;
 
 	/* Handle movement keys first. */
 	if(key_state[SDL_SCANCODE_LSHIFT] || key_state[SDL_SCANCODE_RSHIFT]) {
 		move_multiplier = 2.0;
-		turn_speed *= 2;
+		turn_multiplier = 2.0;
 	}
 
 	if(key_state[SDL_SCANCODE_UP] || key_state[SDL_SCANCODE_W]) {
@@ -47,11 +46,11 @@ void event_process() {
 	}
 
 	if(key_state[SDL_SCANCODE_LEFT]) {
-		player_angle -= turn_speed;
+		player_turn(PLAYER_TURN_LEFT * turn_multiplier);
 	}
 
 	if(key_state[SDL_SCANCODE_RIGHT]) {
-		player_angle += turn_speed;
+		player_turn(PLAYER_TURN_RIGHT * turn_multiplier);
 	}
 
 	if(key_state[SDL_SCANCODE_A]) {
