@@ -9,6 +9,7 @@ extern double player_x;
 extern double player_y;
 extern double player_angle;
 
-void player_collision();
+void player_apply_force(double x, double y);
+void player_update();
 
 #endif /* _PLAYER_H */

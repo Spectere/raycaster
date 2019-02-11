@@ -17,8 +17,14 @@
 #define LOG_LEN 160
 
 /* Move/turn speeds. */
-#define MOVE_SPEED 0.125
-#define TURN_SPEED 2.5
+#define MOVE_FRICTION 0.5
+#define MOVE_FRICTION_STOP 0.01
+#define MOVE_SPEED 0.05
+#define MOVE_SPEED_MAX 0.1
+#define TURN_DECEL 0.75
+#define TURN_DECEL_STOP 0.01
+#define TURN_SPEED 1.75
+#define TURN_SPEED_MAX 3.5
 
 /* Player starting position. */
 #define PLAYER_START_X 8.5
