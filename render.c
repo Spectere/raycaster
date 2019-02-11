@@ -121,7 +121,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
 #endif /* USE_ANTIALIAS */
         }
 
-        render_start = render_center - (int)line_height;
+        render_start = render_center - (int)line_height + 1;
         for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++)
             pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
 
