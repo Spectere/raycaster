@@ -105,10 +105,10 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
         if(shade) {
             distance = (view_tile_y - view_y + (double) (1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
-            SHADE_COL(palette_cga[hit & 0x0F], wall_color);
+            SHADE_COL(palette[hit & 0x0F], wall_color);
         } else {
             distance = (view_tile_x - view_x + (double) (1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
-            wall_color = palette_cga[hit & 0x0F];
+            wall_color = palette[hit & 0x0F];
         }
 
         if(hit == 0) {

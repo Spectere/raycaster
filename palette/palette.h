@@ -15,7 +15,10 @@ typedef struct color {
 	Uint8 b;
 } color_t;
 
-extern const color_t palette_cga[];
+extern int palette_colors;
+extern color_t *palette;
+
+extern color_t palette_cga[];
 
 #define SHADE_ARGB(col) ARGB(col.a,\
                             (Uint8)(col.r / SHADE_FACTOR),\
@@ -27,5 +30,6 @@ extern const color_t palette_cga[];
                              dest.g = (Uint8)(src.g / SHADE_FACTOR);\
                              dest.b = (Uint8)(src.b / SHADE_FACTOR);
 
+void palette_load(char* filename);
 
 #endif /* _PALETTE_H */
