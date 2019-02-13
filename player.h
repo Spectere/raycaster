@@ -13,9 +13,11 @@ extern double player_angle;
 #define PLAYER_TURN_LEFT -1
 
 void player_apply_force(double x, double y);
+void player_get_coords_from_string(char *pos, double *x, double *y);
+SDL_bool player_init();
 void player_turn(double delta);
-void player_set_position(double x, double y);
-void player_set_position_str(char *pos);
+SDL_bool player_set_position(double x, double y);
+void player_set_position_lazy(double x, double y);
 void player_update();
 
 #endif /* _PLAYER_H */

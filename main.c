@@ -38,6 +38,8 @@ void show_help(char* self) {
 
 int main(int argc, char **argv) {
 	int opt, idx;
+	double x, y;
+
 	while((opt = getopt_long(argc, argv, "c:f:hp:s:", long_options, &idx)) != -1) {
 		switch(opt) {
 			case 'c':  /* -c/--ceiling */
@@ -53,7 +55,8 @@ int main(int argc, char **argv) {
 				palette_load(optarg);
 				break;
 			case 's':  /* -s/--start */
-				player_set_position_str(optarg);
+				player_get_coords_from_string(optarg, &x, &y);
+				player_set_position_lazy(x, y);
 				break;
 		}
 	}

@@ -4,6 +4,7 @@
 
 #include "../log.h"
 #include "../player.h"
+
 #include "map.h"
 #include "map_mzm3.h"
 
@@ -143,10 +144,10 @@ SDL_bool map_mzm3_board_load(FILE *f, mzm3_header_t header) {
 
 		/* If the player is on this tile, set their position. */
 		if(mzm_data[i].id == MZX_PLAYER) {
-			lprint(DEBUG, "Player found at tile #%i", i);
+			int x, y;
 
-			int y = i / header.width;
-			int x = i % header.width;
+			GET_COORD(i, x, y);
+			lprint(DEBUG, "Player found at tile #%i: (%i, %i)", i, x, y);
 			player_set_position((double)x + 0.5, (double)y + 0.5);
 		}
 	}

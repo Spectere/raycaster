@@ -9,6 +9,7 @@
 SDL_bool game_running = SDL_TRUE;
 
 void game_loop() {
+	if(!player_init()) exit(1);
 	event_init();
 	render_init();
 	while(game_running) {

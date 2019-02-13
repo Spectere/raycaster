@@ -8,13 +8,36 @@
 #include "player.h"
 #include "log.h"
 
-double player_x = PLAYER_START_X;
-double player_y = PLAYER_START_Y;
+double player_x = -1;
+double player_y = -1;
 double player_angle = PLAYER_START_ANGLE;
 
 static double player_speed_x = 0.0;
 static double player_speed_y = 0.0;
 static double player_spin = 0.0;
+
+static double player_lazy_x = -1.0;
+static double player_lazy_y = -1.0;
+
+SDL_bool find_valid_player_spawn() {
+    int i;
+
+    for(i = 0; i < map_size_x * map_size_y; i++) {
+        map_tile_t tile = map_data[i];
+        if(tile.texture == 0) {
+            int x, y;
+
+            GET_COORD(i, x, y);
+            lprint(INFO, "Empty spot found at tile #%i (%i, %i). Placing player there.", i, x, y);
+            player_set_position((double)x + 0.5, (double)y + 0.5);
+
+            return SDL_TRUE;
+        }
+    }
+
+    /* No empty spaces available. */
+    return SDL_FALSE;
+}
 
 void player_apply_force(double x, double y) {
     if(fabs(player_speed_x) + fabs(player_speed_y) >= MOVE_SPEED_MAX)
@@ -45,27 +68,7 @@ void player_collision() {
         player_y = player_tile_y2 - PLAYER_SIZE;
 }
 
-void player_turn(double direction) {
-    if(fabs(player_spin) >= TURN_SPEED_MAX)
-        return;
-
-    player_spin += TURN_SPEED * direction;
-}
-
-void player_set_position(double x, double y) {
-    if(x >= map_size_x || x < 0 || y >= map_size_y || y < 0) {
-        lprint(WARN, "Tried to put player out of bounds! pos: (%2.2f, %2.2f), map size (%i, %i)",
-               x, y, map_size_x, map_size_y);
-        return;
-    }
-
-    lprint(INFO, "Setting player position to (%4.2f, %4.2f)", x, y);
-
-    player_x = x;
-    player_y = y;
-};
-
-void player_set_position_str(char *pos) {
+void player_get_coords_from_string(char *pos, double *x, double *y) {
     char *pos_work, *end;
     double px, py;
     size_t len;
@@ -90,10 +93,61 @@ void player_set_position_str(char *pos) {
         return;
     }
 
-    player_set_position(px, py);
+    *x = px;
+    *y = py;
+}
 
-    /* Clean up. */
-    free(pos_work);
+SDL_bool player_init() {
+    /* Try to set the player's position to what the user wants it to be. */
+    if(player_lazy_x >= 0 && player_lazy_y >= 0) {
+        lprint(INFO, "Overriding player start position.");
+        if(!player_set_position(player_lazy_x, player_lazy_y))
+            lprint(WARN, "Invalid player coordinates (%4.2f, %4.2f) specified. Using defaults.",
+                    player_lazy_x,
+                    player_lazy_y);
+    }
+
+    /* Make sure that the player is in a valid starting position. */
+    if(player_x < 0 || player_y < 0) {
+        /* Oh dear. */
+        lprint(WARN, "No player start location found. Searching for an empty spot...");
+        if(!find_valid_player_spawn()) {
+            lprint(ERROR, "No empty tiles available!");
+            return SDL_FALSE;
+        }
+    }
+
+    return SDL_TRUE;
+}
+
+void player_turn(double direction) {
+    if(fabs(player_spin) >= TURN_SPEED_MAX)
+        return;
+
+    player_spin += TURN_SPEED * direction;
+}
+
+SDL_bool player_set_position(double x, double y) {
+    if(x >= map_size_x || x < 0 || y >= map_size_y || y < 0) {
+        lprint(WARN, "Tried to put player out of bounds! pos: (%2.2f, %2.2f), map size (%i, %i)",
+               x, y, map_size_x, map_size_y);
+        return SDL_FALSE;
+    }
+
+    lprint(INFO, "Setting player position to (%4.2f, %4.2f)", x, y);
+
+    player_x = x;
+    player_y = y;
+
+    return SDL_TRUE;
+};
+
+void player_set_position_lazy(double x, double y) {
+    /* Sets up where we want player_init() to place the player. This is useful
+     * for the -s/--start argument, as the map isn't loaded when the command
+     * line is parsed. */
+    player_lazy_x = x;
+    player_lazy_y = y;
 }
 
 void player_update() {

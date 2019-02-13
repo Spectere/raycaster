@@ -37,9 +37,7 @@
 #define TURN_SPEED 1.75
 #define TURN_SPEED_MAX 3.5
 
-/* Player starting position. */
-#define PLAYER_START_X -1
-#define PLAYER_START_Y -1
+/* Player data. */
 #define PLAYER_START_ANGLE 90
 #define PLAYER_SIZE 0.35
 
