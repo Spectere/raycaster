@@ -2,22 +2,50 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "defs.h"
+#include "log.h"
 #include "palette/palette.h"
 #include "render.h"
 
-const color_t CEIL_COLOR = { 0xFF, 0x20, 0x20, 0x20 };
-const color_t FLOOR_COLOR = { 0xFF, 0x40, 0x40, 0x40 };
+static color_t ceil_color = { 0xFF, 0x20, 0x20, 0x20 };
+static color_t floor_color = { 0xFF, 0x40, 0x40, 0x40 };
 
 static double aspect_correction;
 static Uint64 ceil_color_precalc, floor_color_precalc;
 
+char* color_to_hex(color_t color) {
+    static char output[7];
+    snprintf(output, 7, "%02X%02X%02X", color.r, color.g, color.b);
+    return output;
+}
+
+void hex_to_color(char *hex, color_t *color) {
+    int offset = 0, len = (int)strlen(hex);
+    char component[3] = "\0\0\0";
+
+    /* Accept input in both RRGGBB and #RRGGBB formats. */
+    if(len != 6 && !(len == 7 && hex[0] == '#'))
+        return;
+
+    if(hex[0] == '#') offset++;
+
+    strncpy(component, hex + offset, 2);
+    color->r = (Uint8)strtol(component, NULL, 16);
+
+    strncpy(component, hex + offset + 2, 2);
+    color->g = (Uint8)strtol(component, NULL, 16);
+
+    strncpy(component, hex + offset + 4, 2);
+    color->b = (Uint8)strtol(component, NULL, 16);
+}
+
 void render_init() {
     aspect_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH);
 
-    ceil_color_precalc = ((Uint64)COL_TO_ARGB(CEIL_COLOR) << 32) + COL_TO_ARGB(CEIL_COLOR);
-    floor_color_precalc = ((Uint64)COL_TO_ARGB(FLOOR_COLOR) << 32) + COL_TO_ARGB(FLOOR_COLOR);
+    ceil_color_precalc = ((Uint64)COL_TO_ARGB(ceil_color) << 32) + COL_TO_ARGB(ceil_color);
+    floor_color_precalc = ((Uint64)COL_TO_ARGB(floor_color) << 32) + COL_TO_ARGB(floor_color);
 }
 
 void render_scene(double view_x, double view_y, double view_angle) {
@@ -134,15 +162,25 @@ void render_scene(double view_x, double view_y, double view_angle) {
         ry = render_center - (int)line_height;
 
         if(ry >= 0) {
-            BLEND(aa_final, CEIL_COLOR, wall_color, frac_level);
+            BLEND(aa_final, ceil_color, wall_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 
         ry = render_center + (int)line_height;
         if(ry < RENDER_HEIGHT) {
-            BLEND(aa_final, FLOOR_COLOR, wall_color, frac_level);
+            BLEND(aa_final, floor_color, wall_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 #endif /* USE_ANTIALIAS */
     }
+}
+
+void render_set_ceiling_color(char *hex) {
+    hex_to_color(hex, &ceil_color);
+    lprint(INFO, "Ceiling color set to %s", color_to_hex(ceil_color));
+}
+
+void render_set_floor_color(char *hex) {
+    hex_to_color(hex, &floor_color);
+    lprint(INFO, "Floor color set to %s", color_to_hex(floor_color));
 }

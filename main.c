@@ -5,13 +5,18 @@
 #include "defs.h"
 #include "game.h"
 #include "palette/palette.h"
+#include "render.h"
 #include "video.h"
 
 static char help_text[] = "\n"
-		"  -h, --help        displays this help screen\n"
+		"  -h, --help        displays this help screen\n\n"
+		"  -c, --ceiling     defines the ceiling color (in RRGGBB, hex)\n"
+		"  -f, --floor       defines the floor color (in RRGGBB, hex)\n"
 		"  -p, --palette     loads a palette file\n";
 
 static struct option long_options[] = {
+		{ "ceiling",	required_argument,	0, 'c' },
+		{ "floor",		required_argument,	0, 'f' },
 		{ "help",		no_argument,		0, 'h' },
 		{ "palette",	required_argument,	0, 'p' },
 		{ 0,			0,					0,	0  }
@@ -23,13 +28,20 @@ void show_help(char* self) {
 
 int main(int argc, char **argv) {
 	int opt, idx;
-	while((opt = getopt_long(argc, argv, "hp:", long_options, &idx)) != -1) {
+	while((opt = getopt_long(argc, argv, "c:f:hp:", long_options, &idx)) != -1) {
 		switch(opt) {
-			case 'h':
+			case 'c':  /* -c/--ceiling */
+				render_set_ceiling_color(optarg);
+				break;
+			case 'f':  /* -f/--floor */
+				render_set_floor_color(optarg);
+				break;
+			case 'h':  /* -h/--help */
 				show_help(argv[0]);
 				exit(0);
-			case 'p':
+			case 'p':  /* -p/--palette */
 				palette_load(optarg);
+				break;
 		}
 	}
 
