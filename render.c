@@ -92,7 +92,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
         double distance;
 
-        Uint8 hit = 0;
+        map_tile_t *hit = NULL;
         SDL_bool shade = SDL_FALSE;
 
         if(ray_delta_x > 0) {
@@ -112,7 +112,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
         }
 
         /* DDA--where all the fun ray stuff happens */
-        while(hit == 0) {
+        while(hit == NULL || hit->texture == 0) {
             if(side_distance_x > side_distance_y) {
                 side_distance_y += delta_y;
                 view_tile_y += step_y;
@@ -124,24 +124,26 @@ void render_scene(double view_x, double view_y, double view_angle) {
             }
 
             /* Bail out if the ray escapes the map boundary. */
-            if(view_tile_x >= MAP_SIZE_X || view_tile_x < 0
-            || view_tile_y >= MAP_SIZE_Y || view_tile_y < 0)
+            if(view_tile_x >= map_size_x || view_tile_x < 0
+            || view_tile_y >= map_size_y || view_tile_y < 0) {
+                hit = NULL;
                 break;
+            }
 
-            hit = map_data[(view_tile_y * MAP_SIZE_X) + view_tile_x];
+            hit = &map_data[(view_tile_y * map_size_x) + view_tile_x];
         }
 
-        if(shade) {
-            distance = (view_tile_y - view_y + (double) (1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
-            SHADE_COL(palette[hit & 0x0F], wall_color);
-        } else {
-            distance = (view_tile_x - view_x + (double) (1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
-            wall_color = palette[hit & 0x0F];
-        }
-
-        if(hit == 0) {
+        if(hit == NULL) {
             line_height = 0;
         } else {
+            if(shade) {
+                distance = (view_tile_y - view_y + (double)(1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
+                SHADE_COL(palette[hit->fg_color], wall_color);
+            } else {
+                distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
+                wall_color = palette[hit->fg_color];
+            }
+
 #ifdef USE_ANTIALIAS
             line_height = (double)RENDER_HEIGHT / distance;
 #else
@@ -154,7 +156,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
             pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
 
 #ifdef USE_ANTIALIAS
-        /* Do a quick anti-aliasing pass using the fractional bit of line_height. This add a bit of
+        /* Do a quick anti-aliasing pass using the fractional bit of line_height. This adds a bit of
          * overdraw (no more than 2 * RENDER_WIDTH) per frame. */
         frac_level = line_height - (int)line_height;
         if(frac_level == 0) continue;

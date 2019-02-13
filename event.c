@@ -5,7 +5,7 @@
 #include "defs.h"
 #include "event.h"
 #include "game.h"
-#include "map.h"
+#include "map/map.h"
 #include "player.h"
 
 static const Uint8 *key_state;

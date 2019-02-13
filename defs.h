@@ -21,7 +21,7 @@
 #define WINDOW_HEIGHT (RENDER_HEIGHT * RENDER_SCALE)
 
 /* The world scale. Lower this to make things feel more claustrophobic.
- * 3x feels roughly the same size as Wolf3D. */
+ * 4x feels roughly the same size as Wolf3D. */
 #define WORLD_SCALE 3
 
 /* Maximum length of the log format string, including the severity tag. */
@@ -38,10 +38,10 @@
 #define TURN_SPEED_MAX 3.5
 
 /* Player starting position. */
-#define PLAYER_START_X 8.5
-#define PLAYER_START_Y 8.5
+#define PLAYER_START_X -1
+#define PLAYER_START_Y -1
 #define PLAYER_START_ANGLE 90
-#define PLAYER_SIZE 0.5
+#define PLAYER_SIZE 0.35
 
 /* Math stuff. */
 #define DEG2RAD(angle) (angle * (M_PI / 180))

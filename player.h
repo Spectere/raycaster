@@ -14,6 +14,8 @@ extern double player_angle;
 
 void player_apply_force(double x, double y);
 void player_turn(double delta);
+void player_set_position(double x, double y);
+void player_set_position_str(char *pos);
 void player_update();
 
 #endif /* _PLAYER_H */
