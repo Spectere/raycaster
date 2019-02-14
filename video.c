@@ -60,6 +60,23 @@ int video_init(const char *title, int render_width, int render_height,
 
 	/* Create an ARGB8888 texture. */
 	lprint(DEBUG, "Creating texture");
+
+#if defined(WINDOW_SCALING_AUTO)
+	if(RENDER_WIDTH > WINDOW_WIDTH || RENDER_HEIGHT > WINDOW_HEIGHT) {
+		lprint(DEBUG, "Texture scaling: linear");
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	} else {
+		lprint(DEBUG, "Texture scaling: nearest");
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+	}
+#elif defined(WINDOW_SCALING_LINEAR)
+	lprint(DEBUG, "Texture scaling: linear");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+#else
+	lprint(DEBUG, "Texture scaling: nearest");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+#endif
+
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
 								SDL_TEXTUREACCESS_STREAMING, tex_width, tex_height);
 	if(texture == NULL) {

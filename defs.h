@@ -19,6 +19,9 @@
 #define RENDER_SCALE 3
 #define WINDOW_WIDTH (RENDER_WIDTH * RENDER_SCALE)
 #define WINDOW_HEIGHT (RENDER_HEIGHT * RENDER_SCALE)
+/*#define WINDOW_SCALING_NEAREST*/
+/*#define WINDOW_SCALING_LINEAR*/
+#define WINDOW_SCALING_AUTO
 
 /* The world scale. Lower this to make things feel more claustrophobic.
  * 4x feels roughly the same size as Wolf3D. */
