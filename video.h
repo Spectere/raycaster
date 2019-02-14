@@ -21,6 +21,7 @@ extern Uint32 *pixels;
 void video_close();
 int video_init(const char *title, int render_width, int render_height,
 			   int window_width, int window_height);
-void video_update();
+void video_update_end();
+void video_update_start();
 
 #endif /* _VIDEO_H */

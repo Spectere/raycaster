@@ -5,6 +5,7 @@
 #include "log.h"
 #include "video.h"
 
+static int pitch;
 int tex_width, tex_height, wnd_width, wnd_height;
 
 Uint32 *pixels;
@@ -84,14 +85,18 @@ int video_init(const char *title, int render_width, int render_height,
 		return 1;
 	}
 
-	pixels = malloc(sizeof(Uint32) * tex_width * tex_height);
+	pitch = sizeof(Uint32) * tex_width;
 
 	lprint(INFO, "Video subsystem initialized successfully");
 	return 0;
 }
 
-void video_update() {
-	SDL_UpdateTexture(texture, NULL, pixels, tex_width * sizeof(Uint32));
+void video_update_end() {
+	SDL_UnlockTexture(texture);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
+}
+
+void video_update_start() {
+	SDL_LockTexture(texture, NULL, (void*)&pixels, &pitch);
 }
