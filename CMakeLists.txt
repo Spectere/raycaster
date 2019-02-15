@@ -15,6 +15,9 @@ add_executable(raycaster
         render.c
         player.c
         palette/palette_cga.c
-        palette/palette.c map/map.c map/map_mzm3_board.c map/map_mzm3.c)
+        palette/palette.c
+        map/map.c
+        map/map_mzm3_board.c
+        map/map_mzm3.c)
 
 target_link_libraries(raycaster m ${SDL2_LIBRARIES})

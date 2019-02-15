@@ -10,13 +10,14 @@
 
 /* Optional features. */
 #define USE_ANTIALIAS
+#define USE_LIGHTING
 
 /* The size of the pixmap. */
-#define RENDER_WIDTH 320
-#define RENDER_HEIGHT 240
+#define RENDER_WIDTH 1920
+#define RENDER_HEIGHT 1080
 
 /* The SDL window size. */
-#define RENDER_SCALE 3
+#define RENDER_SCALE 1
 #define WINDOW_WIDTH (RENDER_WIDTH * RENDER_SCALE)
 #define WINDOW_HEIGHT (RENDER_HEIGHT * RENDER_SCALE)
 
@@ -44,7 +45,9 @@
 /* Math stuff. */
 #define DEG2RAD(angle) (angle * (M_PI / 180))
 
-/* Shading. */
+/* Shading/lighting. */
 #define SHADE_FACTOR 1.5
+#define LIGHT_FALLOFF_DISTANCE 12
+#define FADE_MAX 0.5
 
 #endif /* _DEFS_H */
