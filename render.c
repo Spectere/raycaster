@@ -11,10 +11,7 @@
 
 static color_t ceil_color = { 0xFF, 0x20, 0x20, 0x20 };
 static color_t floor_color = { 0xFF, 0x40, 0x40, 0x40 };
-
-#ifdef USE_LIGHTING
 static color_t fog_color = { 0xFF, 0x00, 0x00, 0x00 };
-#endif /* USE_LIGHTING */
 
 static double aspect_correction;
 static Uint64 ceil_color_precalc, floor_color_precalc;
@@ -85,12 +82,8 @@ void render_scene(double view_x, double view_y, double view_angle) {
         double delta_y = fabs(1 / ray_delta_y);
 
         int step_x, step_y;
-        color_t wall_color;
-
-#ifdef USE_LIGHTING
-        color_t lit_color;
+        color_t wall_color, lit_color;
         double intensity;
-#endif /* USE_LIGHTING */
 
 #ifdef USE_ANTIALIAS
         double line_height, frac_level;
@@ -153,7 +146,6 @@ void render_scene(double view_x, double view_y, double view_angle) {
                 wall_color = palette[hit->fg_color];
             }
 
-#ifdef USE_LIGHTING
             /* Add mood. :) */
             if(distance > 0) {
                 /* Multiplication is faster than pow() for calculating squares in
@@ -164,7 +156,6 @@ void render_scene(double view_x, double view_y, double view_angle) {
                 intensity = 0.0;
             }
             BLEND(lit_color, wall_color, fog_color, intensity);
-#endif /* USE_LIGHTING */
 
 #ifdef USE_ANTIALIAS
             line_height = (double)RENDER_HEIGHT / distance;
@@ -175,11 +166,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
         render_start = render_center - (int)line_height + 1;
         for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++) {
-#ifdef USE_LIGHTING
             pixels[POS(rx, ry)] = COL_TO_ARGB(lit_color);
-#else
-            pixels[POS(rx, ry)] = COL_TO_ARGB(wall_color);
-#endif
         }
 
 #ifdef USE_ANTIALIAS
@@ -191,21 +178,13 @@ void render_scene(double view_x, double view_y, double view_angle) {
         ry = render_center - (int)line_height;
 
         if(ry >= 0) {
-#ifdef USE_LIGHTING
             BLEND(aa_final, ceil_color, lit_color, frac_level);
-#else
-            BLEND(aa_final, ceil_color, wall_color, frac_level);
-#endif /* USE_LIGHTING */
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 
         ry = render_center + (int)line_height;
         if(ry < RENDER_HEIGHT) {
-#ifdef USE_LIGHTING
             BLEND(aa_final, floor_color, lit_color, frac_level);
-#else
-            BLEND(aa_final, floor_color, wall_color, frac_level);
-#endif /* USE_LIGHTING */
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 #endif /* USE_ANTIALIAS */

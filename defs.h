@@ -10,7 +10,6 @@
 
 /* Optional features. */
 #define USE_ANTIALIAS
-#define USE_LIGHTING
 
 /* The size of the pixmap. */
 #define RENDER_WIDTH 1920
