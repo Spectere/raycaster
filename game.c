@@ -21,4 +21,7 @@ void game_loop() {
 		render_scene(player_x, player_y, player_angle);
 		video_update_end();
 	}
+
+	/* Cleanup */
+	render_quit();
 }

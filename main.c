@@ -61,6 +61,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* Some of the optimizations require an even numbered render width. */
+	if(RENDER_WIDTH % 2 || RENDER_HEIGHT % 2) {
+	    lprint(ERROR, "Render width and height must be a multiple of 2.");
+	    return 1;
+	}
+
 	if(optind == argc) {
 		/* Users didn't specify a map file. */
 		show_usage(argv[0]);

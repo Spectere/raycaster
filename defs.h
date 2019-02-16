@@ -50,6 +50,7 @@
 /* Shading/lighting. */
 #define SHADE_FACTOR 1.5
 #define LIGHT_FALLOFF_DISTANCE 12
+#define LIGHT_FLAT_FALLOFF_POWER 3
 #define FADE_MAX 0.5
 
 #endif /* _DEFS_H */

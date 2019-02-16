@@ -14,12 +14,31 @@ static color_t floor_color = { 0xFF, 0x40, 0x40, 0x40 };
 static color_t fog_color = { 0xFF, 0x00, 0x00, 0x00 };
 
 static double aspect_correction;
-static Uint64 ceil_color_precalc, floor_color_precalc;
+static color_t *bg_color;
+static Uint64 *bg_color_precalc;
 
 char* color_to_hex(color_t color) {
     static char output[7];
     snprintf(output, 7, "%02X%02X%02X", color.r, color.g, color.b);
     return output;
+}
+
+static inline double get_flat_distance(int line) {
+    /* Tries to convincingly convert a screen space position to a distance in
+     * 3D space. */
+
+    /* Since RENDER_HEIGHT is variable, we need to work out a fixed distance
+     * from the top/bottom of the screen first. */
+    double ss_dist = (double)line / (double)(RENDER_HEIGHT / 2);
+    double render_distance = log(ss_dist * LIGHT_FALLOFF_DISTANCE + (1 + PLAYER_SIZE));
+
+    /* In some libm implementations it's faster to use muiliplication instead
+     * of pow() when working with integer powers. */
+    int i;
+    for(i = 1; i < LIGHT_FLAT_FALLOFF_POWER; i++)
+        render_distance *= log(ss_dist * LIGHT_FALLOFF_DISTANCE + (1 + PLAYER_SIZE));
+
+    return render_distance;
 }
 
 void hex_to_color(char *hex, color_t *color) {
@@ -44,9 +63,43 @@ void hex_to_color(char *hex, color_t *color) {
 
 void render_init() {
     aspect_correction = ((double)RENDER_HEIGHT / (double)RENDER_WIDTH);
+    int i;
 
-    ceil_color_precalc = ((Uint64)COL_TO_ARGB(ceil_color) << 32) + COL_TO_ARGB(ceil_color);
-    floor_color_precalc = ((Uint64)COL_TO_ARGB(floor_color) << 32) + COL_TO_ARGB(floor_color);
+    /* Dimished lighting pre-calculations. */
+    bg_color = malloc(sizeof(color_t) * RENDER_HEIGHT);
+    bg_color_precalc = malloc(sizeof(Uint64) * RENDER_HEIGHT);
+    if(bg_color_precalc == NULL || bg_color == NULL) {
+        lprint(ERROR, "Unable to malloc background color array!");
+        exit(1);
+    }
+
+    /* Figure out what the colors should be for each row of the floor
+     * and ceiling. */
+    double distance, intensity;
+    for(i = 0; i < RENDER_HEIGHT / 2; i++) {
+        distance = get_flat_distance(i);
+        intensity = log10((distance / LIGHT_FALLOFF_DISTANCE) + 1);
+        intensity = intensity > FADE_MAX ? FADE_MAX : intensity;
+        BLEND(bg_color[i], ceil_color, fog_color, intensity);
+    }
+
+    for(i = RENDER_HEIGHT - 1; i > RENDER_HEIGHT / 2 - 1; i--) {
+        distance = get_flat_distance(RENDER_HEIGHT - i - 1);
+        intensity = log10((distance / LIGHT_FALLOFF_DISTANCE) + 1);
+        intensity = intensity > FADE_MAX ? FADE_MAX : intensity;
+        BLEND(bg_color[i], floor_color, fog_color, intensity);
+    }
+
+    /* Now precalculate the integer values of each color. */
+    for(i = 0; i < RENDER_HEIGHT; i++) {
+        Uint32 val = COL_TO_ARGB(bg_color[i]);
+        bg_color_precalc[i] = ((Uint64)(val) << 32) + val;
+    }
+}
+
+void render_quit() {
+    free(bg_color);
+    free(bg_color_precalc);
 }
 
 void render_scene(double view_x, double view_y, double view_angle) {
@@ -61,13 +114,14 @@ void render_scene(double view_x, double view_y, double view_angle) {
     int render_center = RENDER_HEIGHT / 2;
 
     Uint64 *fill_location = (Uint64*)pixels;
-    int i, fill_size = render_center * RENDER_WIDTH / 2;
-    for(i = 0; i < fill_size; i++)
-        fill_location[i] = ceil_color_precalc;
-    for(; i < RENDER_WIDTH * RENDER_HEIGHT / 2; i++)
-        fill_location[i] = floor_color_precalc;
+    int i = 0, row, col;
+    for(row = 0; row < RENDER_HEIGHT; row++) {
+        for(col = 0; col < RENDER_WIDTH / 2; col++) {
+            fill_location[i++] = bg_color_precalc[row];
+        }
+    }
 
-/* Cast one ray for each vertical strip. */
+    /* Cast one ray for each vertical strip. */
     for(rx = 0; rx < RENDER_WIDTH; rx++) {
         double camera_x = 2 * rx / (double)RENDER_WIDTH - 1;
         double ray_delta_x = facing_x + camera_plane_x * camera_x;
@@ -148,8 +202,6 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
             /* Add mood. :) */
             if(distance > 0) {
-                /* Multiplication is faster than pow() for calculating squares in
-                 * some libm implementations. */
                 intensity = log10((distance / LIGHT_FALLOFF_DISTANCE) + 1);
                 intensity = intensity > FADE_MAX ? FADE_MAX : intensity;
             } else {
@@ -176,15 +228,14 @@ void render_scene(double view_x, double view_y, double view_angle) {
         if(frac_level == 0) continue;
 
         ry = render_center - (int)line_height;
-
         if(ry >= 0) {
-            BLEND(aa_final, ceil_color, lit_color, frac_level);
+            BLEND(aa_final, bg_color[ry], lit_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 
         ry = render_center + (int)line_height;
         if(ry < RENDER_HEIGHT) {
-            BLEND(aa_final, floor_color, lit_color, frac_level);
+            BLEND(aa_final, bg_color[ry], lit_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 #endif /* USE_ANTIALIAS */
