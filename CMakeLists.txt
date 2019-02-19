@@ -18,6 +18,8 @@ add_executable(raycaster
         palette/palette.c
         map/map.c
         map/map_mzm3_board.c
-        map/map_mzm3.c)
+        map/map_mzm3.c
+        texture/texture_chr.c
+        texture/texture.c)
 
 target_link_libraries(raycaster m ${SDL2_LIBRARIES})

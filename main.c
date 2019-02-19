@@ -9,6 +9,7 @@
 #include "palette/palette.h"
 #include "player.h"
 #include "render.h"
+#include "texture/texture.h"
 #include "video.h"
 
 static char help_text[] = "\n"
@@ -16,7 +17,8 @@ static char help_text[] = "\n"
 		"  -c, --ceiling     defines the ceiling color (in RRGGBB, hex)\n"
 		"  -f, --floor       defines the floor color (in RRGGBB, hex)\n"
 		"  -p, --palette     loads a palette file\n"
-		"  -s, --start       sets the player start position (in X,Y format)\n";
+		"  -s, --start       sets the player start position (in X,Y format)\n"
+  		"  -t, --texture     loads a texture pack or character set\n";
 
 static struct option long_options[] = {
 		{ "ceiling",	required_argument,	0, 'c' },
@@ -24,6 +26,7 @@ static struct option long_options[] = {
 		{ "help",		no_argument,		0, 'h' },
 		{ "palette",	required_argument,	0, 'p' },
 		{ "start",		required_argument,	0, 's' },
+		{ "texture",	required_argument,	0, 't' },
 		{ 0,			0,					0,	0  }
 };
 
@@ -40,7 +43,7 @@ int main(int argc, char **argv) {
 	int opt, idx;
 	double x, y;
 
-	while((opt = getopt_long(argc, argv, "c:f:hp:s:", long_options, &idx)) != -1) {
+	while((opt = getopt_long(argc, argv, "c:f:hp:s:t:", long_options, &idx)) != -1) {
 		switch(opt) {
 			case 'c':  /* -c/--ceiling */
 				render_set_ceiling_color(optarg);
@@ -57,6 +60,10 @@ int main(int argc, char **argv) {
 			case 's':  /* -s/--start */
 				player_get_coords_from_string(optarg, &x, &y);
 				player_set_position_lazy(x, y);
+				break;
+			case 't':  /* -t/--texture */
+				if(!texture_load(optarg))
+					lprint(WARN, "Error loading texture set: %s", optarg);
 				break;
 		}
 	}
