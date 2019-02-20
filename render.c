@@ -143,7 +143,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
 #ifdef USE_ANTIALIAS
         double line_height, frac_level;
-        color_t aa_final;
+        color_t aa_final, aa_first, aa_last;
 #else
         int line_height;
 #endif /* USE_ANTIALIAS */
@@ -235,7 +235,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
         render_start = render_center - (int)line_height + 1;
         for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++) {
-            ty = (int)(((ry - render_start) / (line_height * 2)) * wall_texture.height);
+            ty = (int)(((ry - render_start) / ((double)line_height * 2)) * wall_texture.height);
 
             texel_color = wall_texture.get_pixel(&wall_texture, tx, ty, fg, bg);
             BLEND(lit_color, texel_color, fog_color, intensity);
@@ -243,20 +243,26 @@ void render_scene(double view_x, double view_y, double view_angle) {
             pixels[POS(rx, ry)] = COL_TO_ARGB(lit_color);
         }
 
+
 #ifdef USE_ANTIALIAS
         /* Do a quick anti-aliasing pass using the fractional bit of line_height. This adds a bit of
          * overdraw (no more than 2 * RENDER_WIDTH) per frame. */
         frac_level = line_height - (int)line_height;
         if(frac_level == 0) continue;
 
-        ry = render_center - (int)line_height;
-        if(ry >= 0) {
+        /* Since we already have a value for the last drawn row, use that to save
+         * some CPU time. */
+        ry = render_center + (int)line_height;
+        if(ry < RENDER_HEIGHT) {
             BLEND(aa_final, bg_color[ry], lit_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
 
-        ry = render_center + (int)line_height;
-        if(ry < RENDER_HEIGHT) {
+        /* Circle back and grab the top texel if necessary. */
+        ry = render_center - (int)line_height;
+        if(ry >= 0) {
+            texel_color = wall_texture.get_pixel(&wall_texture, tx, 0, fg, bg);
+            BLEND(lit_color, texel_color, fog_color, intensity);
             BLEND(aa_final, bg_color[ry], lit_color, frac_level);
             pixels[POS(rx, ry)] = COL_TO_ARGB(aa_final);
         }
