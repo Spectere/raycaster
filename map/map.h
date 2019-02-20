@@ -6,7 +6,7 @@
 #include <SDL.h>
 
 #define MAP_POS(x, y) ((map_size_x * y) + x)
-#define GET_COORD(i, x, y) { y = i / map_size_x; x = i % map_size_y; }
+#define GET_COORD(i, x, y) { y = i / map_size_x; x = i % map_size_x; }
 
 typedef struct map_tile {
 	Uint8 texture;
