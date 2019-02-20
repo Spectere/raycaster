@@ -4,6 +4,7 @@
 #include "game.h"
 #include "player.h"
 #include "render.h"
+#include "texture/texture.h"
 #include "video.h"
 
 SDL_bool game_running = SDL_TRUE;
@@ -24,4 +25,5 @@ void game_loop() {
 
 	/* Cleanup */
 	render_quit();
+	texture_free();
 }

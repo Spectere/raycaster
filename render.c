@@ -8,6 +8,7 @@
 #include "log.h"
 #include "palette/palette.h"
 #include "render.h"
+#include "texture/texture.h"
 
 static color_t ceil_color = { 0xFF, 0x20, 0x20, 0x20 };
 static color_t floor_color = { 0xFF, 0x40, 0x40, 0x40 };
@@ -110,7 +111,7 @@ void render_scene(double view_x, double view_y, double view_angle) {
     double camera_plane_x = sin(view_angle_rad + (M_PI / 2));
     double camera_plane_y = -cos(view_angle_rad + (M_PI / 2));
 
-    int rx, ry, render_start;
+    int rx, ry, render_start, tx, ty;
     int render_center = RENDER_HEIGHT / 2;
 
     Uint64 *fill_location = (Uint64*)pixels;
@@ -136,8 +137,9 @@ void render_scene(double view_x, double view_y, double view_angle) {
         double delta_y = fabs(1 / ray_delta_y);
 
         int step_x, step_y;
-        color_t wall_color, lit_color;
-        double intensity;
+        color_t fg = palette[0], bg = palette[0], texel_color, lit_color;
+        texture_t wall_texture = textures[0];
+        double intensity, wall_hit_x;
 
 #ifdef USE_ANTIALIAS
         double line_height, frac_level;
@@ -192,22 +194,37 @@ void render_scene(double view_x, double view_y, double view_angle) {
         if(hit == NULL) {
             line_height = 0;
         } else {
+            wall_texture = textures[hit->texture];
+
             if(shade) {
                 distance = (view_tile_y - view_y + (double)(1 - step_y) / 2) / ray_delta_y * WORLD_SCALE * aspect_correction;
-                SHADE_COL(palette[hit->fg_color], wall_color);
+                SHADE_COL(palette[hit->fg_color], fg);
+                SHADE_COL(palette[hit->bg_color], bg);
+
+                wall_hit_x = view_x + distance * ray_delta_x / (WORLD_SCALE * aspect_correction);
             } else {
                 distance = (view_tile_x - view_x + (double)(1 - step_x) / 2) / ray_delta_x * WORLD_SCALE * aspect_correction;
-                wall_color = palette[hit->fg_color];
+                fg = palette[hit->fg_color];
+                bg = palette[hit->bg_color];
+
+                wall_hit_x = view_y + distance * ray_delta_y / (WORLD_SCALE * aspect_correction);
             }
 
-            /* Add mood. :) */
+            tx = (int)((wall_hit_x - (int)wall_hit_x) * wall_texture.width);
+
+            /* Correct horizontal flip on north/east facing walls. */
+            if(!shade && ray_delta_x < 0)
+                tx = wall_texture.width - tx - 1;
+            if(shade && ray_delta_y > 0)
+                tx = wall_texture.width - tx - 1;
+
+            /* Calculate mood. :) */
             if(distance > 0) {
                 intensity = log10((distance / LIGHT_FALLOFF_DISTANCE) + 1);
                 intensity = intensity > FADE_MAX ? FADE_MAX : intensity;
             } else {
                 intensity = 0.0;
             }
-            BLEND(lit_color, wall_color, fog_color, intensity);
 
 #ifdef USE_ANTIALIAS
             line_height = (double)RENDER_HEIGHT / distance;
@@ -218,6 +235,11 @@ void render_scene(double view_x, double view_y, double view_angle) {
 
         render_start = render_center - (int)line_height + 1;
         for(ry = render_start >= 0 ? render_start : 0; ry < render_center + line_height && ry < RENDER_HEIGHT; ry++) {
+            ty = (int)(((ry - render_start) / (line_height * 2)) * wall_texture.height);
+
+            texel_color = wall_texture.get_pixel(&wall_texture, tx, ty, fg, bg);
+            BLEND(lit_color, texel_color, fog_color, intensity);
+
             pixels[POS(rx, ry)] = COL_TO_ARGB(lit_color);
         }
 

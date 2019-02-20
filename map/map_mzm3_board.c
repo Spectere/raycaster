@@ -13,8 +13,8 @@ Uint8 tile_to_char(mzm3_tile_board_t tile) {
 		case MZX_NORMAL: return 178;
 		case MZX_SOLID: return 219;
 		case MZX_BREAKAWAY: return 177;
-		case MZX_CAVE: return 239;
-		case MZX_STAIRS: return 240;
+		case MZX_CAVE: return 161;
+		case MZX_STAIRS: return 162;
 
 		case MZX_CUSTOM_BLOCK:
 		case MZX_CUSTOM_BREAK:
